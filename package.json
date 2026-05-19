@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "wrangler pages dev ./dist",
+    "preview": "wrangler dev",
     "astro": "astro",
-    "deploy": "astro build && wrangler pages deploy ./dist --project-name parity-daily"
+    "deploy": "astro build && wrangler deploy"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.5.0",
