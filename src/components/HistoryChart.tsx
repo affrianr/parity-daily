@@ -17,6 +17,7 @@ export default function HistoryChart({ initialFrom, initialTo }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const hostRef = useRef<HTMLDivElement | null>(null);
+  const tooltipRef = useRef<HTMLDivElement | null>(null);
   const chartRef = useRef<uPlotType | null>(null);
   const reqId = useRef(0);
 
@@ -65,90 +66,164 @@ export default function HistoryChart({ initialFrom, initialTo }: Props) {
   }, [pair, days]);
 
   useEffect(() => {
-    let active = true;
-    if (!hostRef.current || !data || data.dates.length === 0) return;
+    if (!data || data.dates.length === 0) return;
+    const host = hostRef.current;
+    if (!host) return;
+
+    let cancelled = false;
+    let ro: ResizeObserver | undefined;
+    let rafId = 0;
+
     (async () => {
       const mod = await import("uplot");
       await import("uplot/dist/uPlot.min.css");
-      if (!active || !hostRef.current) return;
+      if (cancelled) return;
       const UPlot = mod.default;
+
       const xs = data.dates.map((d) => Math.floor(new Date(d).getTime() / 1000));
       const ys = data.values;
       const min = Math.min(...ys);
       const max = Math.max(...ys);
       const pad = (max - min) * 0.1 || max * 0.01;
 
-      const opts: uPlotType.Options = {
-        width: hostRef.current.clientWidth,
-        height: 360,
-        padding: [20, 16, 8, 16],
-        cursor: {
-          drag: { x: false, y: false },
-          points: { size: 6 },
-        },
-        legend: { show: false },
-        scales: {
-          x: { time: true },
-          y: { range: [min - pad, max + pad] },
-        },
-        axes: [
-          {
-            stroke: "#8b876f",
-            grid: { stroke: "rgba(247,245,238,0.04)" },
-            ticks: { stroke: "rgba(247,245,238,0.08)" },
-            values: (_u, ticks) =>
-              ticks.map((t) =>
-                new Date(t * 1000).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                }),
-              ),
-          },
-          {
-            stroke: "#8b876f",
-            grid: { stroke: "rgba(247,245,238,0.04)" },
-            ticks: { show: false },
-            size: 56,
-          },
-        ],
-        series: [
-          {},
-          {
-            label: `${pair.from}/${pair.to}`,
-            stroke: "#c8ff4d",
-            width: 2,
-            fill: (u: uPlotType) => {
-              const ctx = u.ctx;
-              const grad = ctx.createLinearGradient(0, 0, 0, u.bbox.height);
-              grad.addColorStop(0, "rgba(200, 255, 77, 0.25)");
-              grad.addColorStop(1, "rgba(200, 255, 77, 0)");
-              return grad;
+      function updateTooltip(u: uPlotType) {
+        const tip = tooltipRef.current;
+        if (!tip) return;
+        const idx = u.cursor.idx;
+        if (idx == null) {
+          tip.style.opacity = "0";
+          return;
+        }
+        const xVal = u.data[0][idx] as number;
+        const yVal = u.data[1][idx] as number;
+        if (xVal == null || yVal == null || Number.isNaN(yVal)) {
+          tip.style.opacity = "0";
+          return;
+        }
+        const dateStr = new Date(xVal * 1000).toLocaleDateString("en-US", {
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        });
+        tip.querySelector("[data-tip-date]")!.textContent = dateStr;
+        tip.querySelector("[data-tip-rate]")!.textContent = formatRate(yVal);
+        tip.querySelector("[data-tip-pair]")!.textContent =
+          `${pair.from} / ${pair.to}`;
+
+        const left = u.cursor.left ?? 0;
+        const hostRect = u.root.getBoundingClientRect();
+        const tipWidth = tip.offsetWidth;
+        const maxLeft = hostRect.width - tipWidth - 8;
+        const clamped = Math.max(8, Math.min(left + 14, maxLeft));
+        tip.style.left = `${clamped}px`;
+        tip.style.opacity = "1";
+      }
+
+      const make = () => {
+        if (cancelled) return;
+        const width = host.clientWidth;
+        if (width === 0) {
+          rafId = requestAnimationFrame(make);
+          return;
+        }
+
+        const opts: uPlotType.Options = {
+          width,
+          height: 360,
+          padding: [20, 16, 8, 16],
+          cursor: {
+            drag: { x: false, y: false },
+            points: {
+              size: 7,
+              width: 2,
+              stroke: "#c8ff4d",
+              fill: "#0a0a09",
             },
-            points: { show: false },
           },
-        ],
+          legend: { show: false },
+          scales: {
+            x: { time: true },
+            y: { range: [min - pad, max + pad] },
+          },
+          axes: [
+            {
+              stroke: "#8b876f",
+              grid: { stroke: "rgba(247,245,238,0.04)" },
+              ticks: { stroke: "rgba(247,245,238,0.08)" },
+              values: (_u, ticks) =>
+                ticks.map((t) =>
+                  new Date(t * 1000).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  }),
+                ),
+            },
+            {
+              stroke: "#8b876f",
+              grid: { stroke: "rgba(247,245,238,0.04)" },
+              ticks: { show: false },
+              size: 56,
+            },
+          ],
+          series: [
+            {},
+            {
+              label: `${pair.from}/${pair.to}`,
+              stroke: "#c8ff4d",
+              width: 2,
+              fill: (u: uPlotType) => {
+                const ctx = u.ctx;
+                const grad = ctx.createLinearGradient(0, 0, 0, u.bbox.height);
+                grad.addColorStop(0, "rgba(200, 255, 77, 0.25)");
+                grad.addColorStop(1, "rgba(200, 255, 77, 0)");
+                return grad;
+              },
+              points: { show: false },
+            },
+          ],
+          hooks: {
+            setCursor: [updateTooltip],
+            setData: [updateTooltip],
+          },
+        };
+
+        if (chartRef.current) {
+          chartRef.current.destroy();
+          chartRef.current = null;
+        }
+        chartRef.current = new UPlot(opts, [xs, ys], host);
+
+        ro = new ResizeObserver(() => {
+          if (chartRef.current && host) {
+            chartRef.current.setSize({
+              width: host.clientWidth,
+              height: 360,
+            });
+          }
+        });
+        ro.observe(host);
+
+        const onLeave = () => {
+          if (tooltipRef.current) tooltipRef.current.style.opacity = "0";
+        };
+        host.addEventListener("mouseleave", onLeave);
+        (host as HTMLDivElement & { __cleanup?: () => void }).__cleanup = () => {
+          host.removeEventListener("mouseleave", onLeave);
+        };
       };
 
-      if (chartRef.current) {
-        chartRef.current.destroy();
-        chartRef.current = null;
-      }
-      chartRef.current = new UPlot(opts, [xs, ys], hostRef.current);
-
-      const ro = new ResizeObserver(() => {
-        if (chartRef.current && hostRef.current) {
-          chartRef.current.setSize({
-            width: hostRef.current.clientWidth,
-            height: 360,
-          });
-        }
-      });
-      ro.observe(hostRef.current);
-      return () => ro.disconnect();
+      make();
     })();
 
     return () => {
-      active = false;
+      cancelled = true;
+      if (rafId) cancelAnimationFrame(rafId);
+      ro?.disconnect();
+      const host = hostRef.current as
+        | (HTMLDivElement & { __cleanup?: () => void })
+        | null;
+      host?.__cleanup?.();
       if (chartRef.current) {
         chartRef.current.destroy();
         chartRef.current = null;
@@ -182,10 +257,7 @@ export default function HistoryChart({ initialFrom, initialTo }: Props) {
       </div>
 
       <div className="mt-8 grid grid-cols-2 gap-px bg-bone-50/8 md:grid-cols-4">
-        <Stat
-          label="Latest"
-          value={summary ? formatRate(summary.last) : "—"}
-        />
+        <Stat label="Latest" value={summary ? formatRate(summary.last) : "—"} />
         <Stat
           label="Change"
           value={
@@ -206,7 +278,33 @@ export default function HistoryChart({ initialFrom, initialTo }: Props) {
       </div>
 
       <div className="relative mt-10 overflow-hidden rounded-3xl border border-bone-50/8 bg-ink-900/40 p-4 md:p-6">
-        <div ref={hostRef} className="h-[360px] w-full" />
+        <div ref={hostRef} className="relative h-[360px] w-full" />
+
+        <div
+          ref={tooltipRef}
+          className="pointer-events-none absolute top-3 left-3 z-10 min-w-[160px] rounded-xl border border-bone-50/12 bg-ink-950/90 px-3.5 py-2.5 opacity-0 backdrop-blur-md transition-opacity duration-150"
+          aria-hidden="true"
+        >
+          <div
+            data-tip-pair
+            className="font-mono-tabular text-[10px] uppercase tracking-wide-meta text-bone-400"
+          >
+            —
+          </div>
+          <div
+            data-tip-rate
+            className="font-display mt-1 text-xl font-medium tracking-tight-display text-lime-accent"
+          >
+            —
+          </div>
+          <div
+            data-tip-date
+            className="mt-1 font-mono-tabular text-[10px] text-bone-300"
+          >
+            —
+          </div>
+        </div>
+
         {(loading || !data) && !error && (
           <div className="pointer-events-none absolute inset-0 grid place-items-center text-xs text-bone-400">
             Loading chart…
