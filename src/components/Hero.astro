@@ -1,0 +1,98 @@
+---
+import Converter from "./Converter.tsx";
+import StaleBadge from "./StaleBadge.tsx";
+
+interface Props {
+  from: string;
+  to: string;
+  amount: number;
+  initialRate?: number;
+  initialDate?: string;
+}
+
+const { from, to, amount, initialRate, initialDate } = Astro.props;
+---
+<section id="convert" class="relative pt-36 md:pt-44 pb-24 md:pb-40">
+  <div class="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+    <div class="absolute -top-40 left-1/2 h-[640px] w-[1200px] -translate-x-1/2 rounded-full bg-lime-accent/10 blur-[160px]" aria-hidden="true"></div>
+    <div
+      class="absolute inset-0 opacity-30 mix-blend-luminosity"
+      style="background-image: url('https://picsum.photos/seed/tokyo-night/1920/1080'); background-size: cover; background-position: center; filter: grayscale(1) contrast(1.2) brightness(0.4);"
+      aria-hidden="true"
+    ></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-ink-950/40 via-ink-950/85 to-ink-950" aria-hidden="true"></div>
+  </div>
+
+  <div class="mx-auto grid w-full max-w-7xl grid-cols-1 gap-12 px-6 lg:grid-cols-12 lg:gap-10">
+    <div class="lg:col-span-7 lg:pt-8" data-reveal>
+      <div class="mb-8 flex flex-wrap items-center gap-3">
+        <StaleBadge date={initialDate} client:idle />
+        <span class="font-mono-tabular text-[11px] uppercase tracking-wide-meta text-bone-400">
+          161 currencies · ECB anchored
+        </span>
+      </div>
+
+      <h1 class="font-display max-w-6xl text-display-xl font-medium tracking-tight-display text-bone-50">
+        Convert any
+        <span class="relative mx-1 inline-flex align-middle">
+          <span
+            class="block h-[0.85em] w-[1.6em] rounded-full bg-cover bg-center"
+            style="background-image: url('https://picsum.photos/seed/banknotes/600/400'); filter: contrast(1.1) saturate(1.2);"
+            aria-hidden="true"
+          ></span>
+        </span>
+        currency without
+        <span class="text-bone-400">the noise</span>.
+      </h1>
+
+      <p class="mt-8 max-w-xl text-base leading-relaxed text-bone-300 md:text-lg">
+        A clean, shareable converter built on European Central Bank reference rates.
+        No ads, no upsell, no opaque spreads. Just the number you came for.
+      </p>
+
+      <div class="mt-10 flex flex-wrap items-center gap-3">
+        <a
+          href="#convert"
+          class="inline-flex items-center gap-2 rounded-full bg-lime-accent px-6 py-3.5 font-medium text-ink-950 transition-transform hover:-translate-y-0.5"
+        >
+          Start converting
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M3 8h10m0 0L9 4m4 4l-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" />
+          </svg>
+        </a>
+        <a
+          href="#trend"
+          class="inline-flex items-center gap-2 rounded-full border border-bone-50/15 px-6 py-3.5 text-bone-100 transition-colors hover:border-bone-50/30 hover:bg-bone-50/5"
+        >
+          See trend chart
+        </a>
+      </div>
+
+      <dl class="mt-14 grid max-w-md grid-cols-3 gap-px overflow-hidden rounded-2xl border border-bone-50/8 bg-bone-50/8">
+        <div class="bg-ink-950 px-4 py-4">
+          <dt class="font-mono-tabular text-[10px] uppercase tracking-wide-meta text-bone-400">Sources</dt>
+          <dd class="font-display mt-1 text-xl text-bone-50">ECB</dd>
+        </div>
+        <div class="bg-ink-950 px-4 py-4">
+          <dt class="font-mono-tabular text-[10px] uppercase tracking-wide-meta text-bone-400">Currencies</dt>
+          <dd class="font-display mt-1 text-xl text-bone-50">31</dd>
+        </div>
+        <div class="bg-ink-950 px-4 py-4">
+          <dt class="font-mono-tabular text-[10px] uppercase tracking-wide-meta text-bone-400">Cadence</dt>
+          <dd class="font-display mt-1 text-xl text-bone-50">Daily</dd>
+        </div>
+      </dl>
+    </div>
+
+    <div class="lg:col-span-5 lg:translate-y-12" data-reveal>
+      <Converter
+        client:load
+        initialFrom={from}
+        initialTo={to}
+        initialAmount={amount}
+        initialRate={initialRate}
+        initialDate={initialDate}
+      />
+    </div>
+  </div>
+</section>

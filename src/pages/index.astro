@@ -1,0 +1,54 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Nav from "@/components/Nav.astro";
+import Hero from "@/components/Hero.astro";
+import CurrencyMarquee from "@/components/CurrencyMarquee.astro";
+import PopularPairs from "@/components/PopularPairs.astro";
+import HistorySection from "@/components/HistorySection.astro";
+import FAQ from "@/components/FAQ.astro";
+import Footer from "@/components/Footer.astro";
+import ScrollController from "@/components/ScrollController.tsx";
+import { parseState } from "@/lib/url-state";
+import { fetchLatest } from "@/lib/frankfurter";
+
+export const prerender = false;
+
+const state = parseState(Astro.url.searchParams);
+
+let initialRate: number | undefined;
+let initialDate: string | undefined;
+try {
+  const latest = await fetchLatest(state.from, state.to, 1);
+  initialRate = latest.rates[state.to];
+  initialDate = latest.date;
+} catch {
+  initialRate = undefined;
+  initialDate = undefined;
+}
+
+const fmt = new Intl.NumberFormat("en-US", { maximumFractionDigits: 4 });
+const convertedHint =
+  initialRate != null
+    ? `${fmt.format(state.amount * initialRate)} ${state.to}`
+    : `${state.amount} ${state.from}`;
+
+const title = `${state.amount} ${state.from} to ${state.to} · parity`;
+const description = `${convertedHint} — converted using European Central Bank reference rates. Clean, shareable, no upsell.`;
+---
+<BaseLayout title={title} description={description}>
+  <a id="top" tabindex="-1"></a>
+  <Nav />
+  <Hero
+    from={state.from}
+    to={state.to}
+    amount={state.amount}
+    initialRate={initialRate}
+    initialDate={initialDate}
+  />
+  <CurrencyMarquee />
+  <PopularPairs />
+  <HistorySection from={state.from} to={state.to} />
+  <FAQ />
+  <Footer />
+  <ScrollController client:idle />
+</BaseLayout>

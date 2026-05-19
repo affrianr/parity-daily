@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.astro/
+.wrangler/
+.DS_Store
+.env
+.env.local
+*.log
+
+# Local tooling
+.claude/
+.playwright-mcp/
+
+# Local screenshots from dev verification
+parity-*.png
+faq-*.png
+share-*.png

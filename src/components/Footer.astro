@@ -1,0 +1,51 @@
+---
+const year = new Date().getFullYear();
+---
+<footer class="relative border-t border-bone-50/8 pt-24 pb-12">
+  <div class="mx-auto max-w-7xl px-6">
+    <div class="grid grid-cols-1 gap-16 lg:grid-cols-12">
+      <div class="lg:col-span-7" data-reveal>
+        <h2 class="font-display max-w-3xl text-display-lg font-medium tracking-tight-display text-bone-50">
+          One number. No upsell.
+          <span class="text-bone-400">Ready when you are.</span>
+        </h2>
+        <a
+          href="#convert"
+          class="mt-10 inline-flex items-center gap-3 rounded-full bg-lime-accent px-7 py-4 font-medium text-ink-950 transition-transform hover:-translate-y-0.5"
+        >
+          Back to converter
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M3 8h10m0 0L9 4m4 4l-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" />
+          </svg>
+        </a>
+      </div>
+
+      <div class="grid grid-cols-2 gap-8 text-sm lg:col-span-5">
+        <div>
+          <span class="font-mono-tabular text-[10px] uppercase tracking-wide-meta text-bone-400">Built on</span>
+          <ul class="mt-4 space-y-2 text-bone-200">
+            <li><a href="https://frankfurter.dev" target="_blank" rel="noopener" class="hover:text-lime-accent">Frankfurter API</a></li>
+            <li><a href="https://www.ecb.europa.eu/" target="_blank" rel="noopener" class="hover:text-lime-accent">European Central Bank</a></li>
+            <li><a href="https://astro.build" target="_blank" rel="noopener" class="hover:text-lime-accent">Astro · Cloudflare</a></li>
+          </ul>
+        </div>
+        <div>
+          <span class="font-mono-tabular text-[10px] uppercase tracking-wide-meta text-bone-400">Quick links</span>
+          <ul class="mt-4 space-y-2 text-bone-200">
+            <li><a href="#convert" class="hover:text-lime-accent">Converter</a></li>
+            <li><a href="#pairs" class="hover:text-lime-accent">Popular pairs</a></li>
+            <li><a href="#trend" class="hover:text-lime-accent">Historical trend</a></li>
+            <li><a href="#why" class="hover:text-lime-accent">How it works</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-24 flex flex-wrap items-center justify-between gap-4 border-t border-bone-50/8 pt-8 text-xs text-bone-400">
+      <span class="font-mono-tabular">parity · {year}</span>
+      <span class="font-mono-tabular">
+        Reference data — not financial advice. Banks and remittance services apply their own spread.
+      </span>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,80 @@
+---
+import PairCard from "./PairCard.astro";
+import { POPULAR_PAIRS } from "@/lib/currencies";
+import { fetchMultiLatest } from "@/lib/frankfurter";
+
+let ratesUsdBase: Record<string, number> = {};
+let ratesEurBase: Record<string, number> = {};
+let ratesGbpBase: Record<string, number> = {};
+let ratesAudBase: Record<string, number> = {};
+
+try {
+  const [usd, eur, gbp, aud] = await Promise.all([
+    fetchMultiLatest("USD", ["EUR", "JPY", "CAD"]),
+    fetchMultiLatest("EUR", ["GBP"]),
+    fetchMultiLatest("GBP", ["USD"]),
+    fetchMultiLatest("AUD", ["USD"]),
+  ]);
+  ratesUsdBase = usd.rates;
+  ratesEurBase = eur.rates;
+  ratesGbpBase = gbp.rates;
+  ratesAudBase = aud.rates;
+} catch {
+  // Soft-fail — cards render with em-dashes
+}
+
+function rateFor(from: string, to: string): number | null {
+  if (from === "USD") return ratesUsdBase[to] ?? null;
+  if (from === "EUR") return ratesEurBase[to] ?? null;
+  if (from === "GBP") return ratesGbpBase[to] ?? null;
+  if (from === "AUD") return ratesAudBase[to] ?? null;
+  return null;
+}
+
+const spans: Array<"wide" | "narrow" | "tall"> = ["wide", "narrow", "narrow", "narrow", "narrow", "wide"];
+const seeds = ["marble", "ledger", "skyline", "circuit", "concrete", "exchange"];
+const cards = POPULAR_PAIRS.map((p, i) => ({
+  ...p,
+  rate: rateFor(p.from, p.to),
+  span: spans[i],
+  imageSeed: seeds[i],
+}));
+---
+<section id="pairs" class="relative py-32 md:py-48">
+  <div class="mx-auto max-w-7xl px-6">
+    <div class="flex flex-wrap items-end justify-between gap-8" data-reveal>
+      <div>
+        <span class="font-mono-tabular text-[11px] uppercase tracking-wide-meta text-bone-400">
+          What people convert
+        </span>
+        <h2 class="font-display mt-4 max-w-3xl text-display-lg font-medium tracking-tight-display text-bone-50">
+          Six pairs that move the world's money on any given day.
+        </h2>
+      </div>
+      <a
+        href="#convert"
+        class="inline-flex items-center gap-2 rounded-full border border-bone-50/15 px-5 py-2.5 text-sm text-bone-100 transition-colors hover:border-lime-accent/40 hover:bg-bone-50/5"
+      >
+        Build your own
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3 8h10m0 0L9 4m4 4l-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" />
+        </svg>
+      </a>
+    </div>
+
+    <div
+      class="mt-16 grid grid-cols-1 gap-px bg-bone-50/8 md:grid-cols-4 md:grid-flow-dense rounded-3xl overflow-hidden border border-bone-50/8"
+      style="grid-auto-flow: dense;"
+    >
+      {cards.map((c) => (
+        <PairCard
+          from={c.from}
+          to={c.to}
+          rate={c.rate}
+          span={c.span}
+          imageSeed={c.imageSeed}
+        />
+      ))}
+    </div>
+  </div>
+</section>

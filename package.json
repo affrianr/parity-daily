@@ -1,0 +1,33 @@
+{
+  "name": "currency-exchange",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "wrangler pages dev ./dist",
+    "astro": "astro",
+    "deploy": "astro build && wrangler pages deploy ./dist --project-name currency-exchange"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^12.5.0",
+    "@astrojs/react": "^4.2.7",
+    "@astrojs/tailwind": "^6.0.2",
+    "@gsap/react": "^2.1.2",
+    "astro": "^5.7.13",
+    "clsx": "^2.1.1",
+    "gsap": "^3.12.7",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.3",
+    "uplot": "^1.6.31"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "wrangler": "^3.114.0"
+  }
+}

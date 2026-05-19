@@ -1,0 +1,34 @@
+---
+import HistoryChart from "./HistoryChart.tsx";
+
+interface Props {
+  from: string;
+  to: string;
+}
+
+const { from, to } = Astro.props;
+---
+<section id="trend" data-pin-section class="relative py-32 md:py-48">
+  <div class="mx-auto grid max-w-7xl grid-cols-1 gap-16 px-6 lg:grid-cols-12">
+    <aside data-pin-title class="lg:col-span-4" data-reveal>
+      <span class="font-mono-tabular text-[11px] uppercase tracking-wide-meta text-bone-400">
+        How the pair has moved
+      </span>
+      <h2 class="font-display mt-4 text-display-lg font-medium tracking-tight-display text-bone-50">
+        Read the line, not the headline.
+      </h2>
+      <p class="mt-6 max-w-md text-base leading-relaxed text-bone-300">
+        The chart updates the moment you change a pair in the converter above.
+        Hover to inspect any session. Toggle the range to widen the lens.
+      </p>
+      <div class="mt-10 flex items-center gap-3 font-mono-tabular text-[11px] uppercase tracking-wide-meta text-bone-400">
+        <span class="block h-px w-12 bg-lime-accent"></span>
+        Live pair shown
+      </div>
+    </aside>
+
+    <div class="lg:col-span-8" data-scrub-fade>
+      <HistoryChart client:visible initialFrom={from} initialTo={to} />
+    </div>
+  </div>
+</section>

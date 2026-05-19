@@ -1,0 +1,88 @@
+---
+const items = [
+  {
+    q: "Is this a real-time rate?",
+    a: "Not in the high-frequency sense. We use the European Central Bank reference fixing, which publishes once per business day around 16:00 CET. For everyday conversion the number is accurate. For trading desks it is not.",
+    tag: "Cadence",
+  },
+  {
+    q: "Why are weekends frozen?",
+    a: "FX markets close on weekends and the ECB doesn't publish on bank holidays. We carry the most recent business day's fixing forward until Monday's release. The timestamp under each result always reflects the true publish date — never today's clock.",
+    tag: "Calendar",
+  },
+  {
+    q: "Where do the rates come from?",
+    a: "Frankfurter, an open-source proxy for the ECB feed. No API key, no rate limit, no tracking. We cache responses at the Cloudflare edge for one hour to be respectful to the upstream and to keep the page fast for everyone.",
+    tag: "Source",
+  },
+  {
+    q: "Can I share a specific conversion?",
+    a: "Every conversion lives in the URL. Change any field and the address bar updates in place — no reloads, no history pollution. Copy the link, send it, bookmark it. Opening it later replays the exact same conversion with fresh rates.",
+    tag: "Share",
+  },
+];
+---
+<section id="why" class="relative py-32 md:py-48">
+  <div class="mx-auto max-w-7xl px-6">
+    <div class="grid grid-cols-1 gap-16 lg:grid-cols-12">
+      <div class="lg:col-span-5" data-reveal>
+        <span class="font-mono-tabular text-[11px] uppercase tracking-wide-meta text-bone-400">
+          Things worth asking
+        </span>
+        <h2 class="font-display mt-4 text-display-lg font-medium tracking-tight-display text-bone-50">
+          We are honest about
+          <span class="text-bone-400">what this is and isn't</span>.
+        </h2>
+        <p class="mt-6 max-w-md text-base leading-relaxed text-bone-300">
+          A converter is only as trustworthy as the data behind it. Here is exactly
+          where ours comes from, what it can do, and what it cannot.
+        </p>
+      </div>
+
+      <div class="lg:col-span-7" data-reveal>
+        <ul class="divide-y divide-bone-50/8 overflow-hidden rounded-3xl border border-bone-50/8 bg-ink-900/40">
+          {items.map((it, i) => (
+            <li>
+              <details class="group">
+                <summary class="flex cursor-pointer list-none items-start justify-between gap-6 px-6 py-6 transition-colors hover:bg-bone-50/5 md:px-8 md:py-7">
+                  <div class="flex flex-1 items-start gap-5">
+                    <span class="mt-1.5 font-mono-tabular text-[11px] uppercase tracking-wide-meta text-bone-400">
+                      0{i + 1}
+                    </span>
+                    <div class="flex-1">
+                      <span class="font-display text-xl font-medium leading-tight tracking-tight-display text-bone-50 md:text-2xl">
+                        {it.q}
+                      </span>
+                      <span class="mt-2 block font-mono-tabular text-[11px] uppercase tracking-wide-meta text-bone-500">
+                        {it.tag}
+                      </span>
+                    </div>
+                  </div>
+                  <span
+                    class="mt-1 grid h-9 w-9 shrink-0 place-items-center rounded-full border border-bone-50/15 text-bone-200 transition-all duration-300 group-hover:border-lime-accent/40 group-open:rotate-45 group-open:border-lime-accent group-open:bg-lime-accent group-open:text-ink-950"
+                    aria-hidden="true"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                      <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" />
+                    </svg>
+                  </span>
+                </summary>
+                <div class="px-6 pb-8 md:px-8 md:pb-10">
+                  <p class="max-w-3xl text-base leading-relaxed text-bone-200 md:pl-[3.5rem]">
+                    {it.a}
+                  </p>
+                </div>
+              </details>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  details > summary::-webkit-details-marker { display: none; }
+  details > summary { list-style: none; }
+  details[open] > summary { background: rgba(247, 245, 238, 0.03); }
+</style>
