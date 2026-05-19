@@ -8,7 +8,7 @@
     "build": "astro build",
     "preview": "wrangler pages dev ./dist",
     "astro": "astro",
-    "deploy": "astro build && wrangler pages deploy ./dist --project-name currency-exchange"
+    "deploy": "astro build && wrangler pages deploy ./dist --project-name parity-daily"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.5.0",
